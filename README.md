@@ -117,3 +117,59 @@ as
 ```
 {{ .Data.<field> }}
 ```
+
+There are now two custom functions available to use in templates: replace and indent.
+
+The replace function takes three string arguments:
+
+- input: The string to operate on
+- from: What you want to replace
+- to: The replacement
+
+Example:
+
+```yaml
+key: '{{ replace "foobar" "foo" "bar" }}'
+```
+
+will generate
+
+```yaml
+key: 'barbar'
+```
+
+The indent function indents all lines in a multiline string but the first by a given number of spaces. It has two inputs:
+
+- input: The multiline string to operate on
+- spaces: A number of spaces to add at the beginning of every newline
+
+Example:
+We have a multiline string defined in first.yaml:
+
+```yaml
+multi: |
+  I am indented by two
+  spaces for a snytactically correct yaml,
+  but those spaces get stripped away when reading the key.
+```
+
+In second.yaml, I want to refer to this string:
+
+```yaml
+multiline: |
+  {{ indent .Data.multi 2 }}
+
+```
+
+Loading both of them with the files input set to "first.yaml,second.yaml", we will get both keys correctly formatted:
+
+```yaml
+multi: |
+  I am indented by two
+  spaces for a snytactically correct yaml,
+  but those spaces get stripped away when reading the key.
+multiline: |
+  I am indented by two
+  spaces for a snytactically correct yaml,
+  but those spaces get stripped away when reading the key.
+```

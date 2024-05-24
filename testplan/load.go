@@ -17,6 +17,14 @@ import (
 	"text/template"
 )
 
+func replace(input, from, to string) string {
+	return strings.Replace(input, from, to, -1)
+}
+
+func indent(input string, spaces int) string {
+	return strings.ReplaceAll(input, "\n", "\n"+strings.Repeat(" ", spaces))
+}
+
 // Load all files as templates, convert them into maps and merge them together
 func (plan *Testplan) loadFiles() error {
 	logger := log.With().Str("func", "loadFiles").Str("package", "testplan").Logger()
@@ -132,7 +140,12 @@ func (plan *Testplan) parseFile(name string) ([]byte, error) {
 			return b.Bytes(), err
 		}
 	}
-	t = template.New(template_name)
+
+	funcMap := template.FuncMap{
+		"replace": replace,
+		"indent":  indent,
+	}
+	t = template.New(template_name).Funcs(funcMap)
 	t, err = t.Parse(raw)
 	if err != nil {
 		log.Error().Err(err).Str("file", name).Msg("Failed to parse template")
