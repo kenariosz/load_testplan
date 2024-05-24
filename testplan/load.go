@@ -42,6 +42,7 @@ func (plan *Testplan) loadFiles() error {
 			default:
 				err := errors.New("Unkonwn file suffix " + suffix + ". Can't use input type 'auto'.")
 				log.Error().Err(err).Str("file", f).Str("suffix", suffix).Msg("Can't determine file type")
+				fmt.Println("::error :: Error: Unkonwn file suffix " + suffix + ". Can't use input type 'auto'.")
 				return err
 			}
 		}
@@ -51,12 +52,14 @@ func (plan *Testplan) loadFiles() error {
 			err = json.Unmarshal(input, &data)
 			if err != nil {
 				log.Error().Err(err).Str("file", f).Msg("Could not unmarshall json")
+				fmt.Println("::error :: Error: Could not unmarshall json:" + err.Error())
 				return err
 			}
 		default:
 			err = yaml.Unmarshal(input, &data)
 			if err != nil {
 				log.Error().Err(err).Str("file", f).Msg("Could not unmarshall yaml")
+				fmt.Println("::error :: Error: Could not unmarshall json:" + err.Error())
 				return err
 			}
 		}
@@ -76,6 +79,7 @@ func getFromURL(url string) (string, error) {
 	r, err := http.Get(url)
 	if err != nil {
 		logger.Error().Err(err).Msg("Get from URL failed")
+		fmt.Println("::error :: Error: Get from URL failed:" + err.Error())
 		return "", err
 	}
 	defer r.Body.Close()
@@ -83,12 +87,14 @@ func getFromURL(url string) (string, error) {
 	if r.StatusCode != http.StatusOK {
 		e := fmt.Errorf("HTTP status %v is not OK", r.StatusCode)
 		logger.Error().Err(e).Msg("Unsupported HTTP status")
+		fmt.Println("::error :: Error: " + e.Error())
 		return "", e
 	}
 
 	data, err := io.ReadAll(r.Body)
 	if err != nil {
 		logger.Error().Err(err).Msg("Failed to read HTTP response body")
+		fmt.Println("::error :: Error: Failed to read HTTP response body:" + err.Error())
 		return "", err
 	}
 
@@ -111,6 +117,7 @@ func (plan *Testplan) parseFile(name string) ([]byte, error) {
 		raw = string(s)
 		if err != nil {
 			log.Error().Err(err).Str("file", name).Msg("Failed to read file")
+			fmt.Println("::error :: Error: Failed to read file '" + name + "':" + err.Error())
 			return b.Bytes(), err
 		}
 	} else {
@@ -129,10 +136,12 @@ func (plan *Testplan) parseFile(name string) ([]byte, error) {
 	t, err = t.Parse(raw)
 	if err != nil {
 		log.Error().Err(err).Str("file", name).Msg("Failed to parse template")
+		fmt.Println("::error :: Error: Failed to parse template:" + err.Error())
 		return b.Bytes(), err
 	}
 	if err = t.Execute(&b, plan); err != nil {
 		log.Error().Err(err).Str("file", name).Msg("Failed to execute template")
+		fmt.Println("::error :: Error: Failed to execute template:" + err.Error())
 		return b.Bytes(), err
 	}
 	log.Trace().Str("raw", raw).Str("parsed", string(b.Bytes())).Msg("Parsed file")

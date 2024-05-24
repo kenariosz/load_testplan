@@ -2,6 +2,7 @@ package testplan
 
 import (
 	"errors"
+	"fmt"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
 	githubactions "github.com/sethvargo/go-githubactions"
@@ -47,6 +48,7 @@ func New() (*Testplan, error) {
 	g, err := githubactions.Context()
 	if err != nil {
 		logger.Fatal().Err(err).Msg("Failed to get github context")
+		fmt.Println("::error :: Error: Failed to get github context:" + err.Error())
 		return nil, err
 	}
 	plan.Github = g
@@ -117,6 +119,7 @@ func (plan *Testplan) getFileList() error {
 	raw_files := plan.Actions.GetInput("files")
 	if raw_files == "" {
 		logger.Error().Str("error", "Missing parameter").Msg("Mandatory parameter 'files' is not defined")
+		fmt.Println("::error :: Error: Mandatory parameter 'files' is not defined.")
 		return errors.New("missing parameter")
 	}
 	f := strings.Split(raw_files, ",")

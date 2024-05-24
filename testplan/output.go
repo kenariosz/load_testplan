@@ -19,6 +19,7 @@ func (plan *Testplan) Output() error {
 		f, err := os.Create(plan.YamlName)
 		if err != nil {
 			logger.Warn().Err(err).Str("file", plan.YamlName).Msg("Can't open yaml file, skipping yaml output")
+			fmt.Println("::warning :: Warning: Can't open yaml file, skipping yaml output:" + err.Error())
 			plan.YamlName = ""
 		} else {
 			plan.yamlfile = f
@@ -47,12 +48,14 @@ func (plan *Testplan) OutputJson() {
 		f, err := os.Create(plan.JsonName)
 		if err != nil {
 			logger.Warn().Err(err).Str("file", plan.JsonName).Msg("Can't open json file, skipping json output")
+			fmt.Println("::warning :: Warning: Can't open json file, skipping json output:" + err.Error())
 			return
 		}
 		defer f.Close()
 		j, err := json.MarshalIndent(plan.Data, "", "    ")
 		if err != nil {
 			logger.Warn().Err(err).Str("file", plan.JsonName).Msg("Can't marshal json, skipping json output")
+			fmt.Println("::warning :: Warning: Can't marshal json, skipping json output:" + err.Error())
 			return
 		}
 		fmt.Fprint(f, string(j))
@@ -68,10 +71,12 @@ func (plan *Testplan) debugOutputFile() {
 		filename, ok := os.LookupEnv("GITHUB_OUTPUT")
 		if !ok {
 			logger.Error().Str("error", "Could not get GITHUB_OUTPUT").Msg("Failed to dump outputs")
+			fmt.Println("::error :: Error: Could not get GITHUB_OUTPUT.")
 		} else {
 			data, err := os.ReadFile(filename)
 			if err != nil {
 				logger.Error().Err(err).Str("file", filename).Msg("Failed read file")
+				fmt.Println("::error :: Error: Failed read file '" + filename + "':" + err.Error())
 			} else {
 				logger.Trace().Str("output", string(data)).Str("file", filename).Msg("Content of GITHUB_OUTPUT")
 			}
@@ -176,6 +181,7 @@ func (plan *Testplan) OutputJob() error {
 	genfile, err := os.Create(filename)
 	if err != nil {
 		logger.Error().Err(err).Str("file", filename).Msg("Can't open " + filename)
+		fmt.Println("::error :: Error: Can't open '" + filename + "':" + err.Error())
 		return err
 	}
 	defer genfile.Close()
@@ -183,10 +189,12 @@ func (plan *Testplan) OutputJob() error {
 	t, err = t.Parse(generate_template)
 	if err != nil {
 		log.Fatal().Err(err).Msg("Failed to parse template for GenerateJob")
+		fmt.Println("::error :: Error: Failed to parse template for GenerateJob:" + err.Error())
 		return err
 	}
 	if err = t.Execute(genfile, plan); err != nil {
 		log.Fatal().Err(err).Str("file", filename).Msg("Failed to write template output")
+		fmt.Println("::error :: Error: Failed to write template output:" + err.Error())
 		return err
 	}
 	return nil
@@ -199,6 +207,7 @@ func sanitizeName(name string) (string, error) {
 	m, err := regexp.Compile(r)
 	if err != nil {
 		log.Error().Err(err).Str("regexp", r).Msg("Failed to compile regexp.")
+		fmt.Println("::error :: Error: Failed to compile regexp '" + r + "':" + err.Error())
 		return "", err
 	}
 	s := m.ReplaceAllString(name, "_")
@@ -206,6 +215,7 @@ func sanitizeName(name string) (string, error) {
 	illegal_start, err := regexp.Match(r, []byte(s))
 	if err != nil {
 		log.Error().Err(err).Str("regexp", r).Msg("Failed match start with regexp.")
+		fmt.Println("::error :: Error: Failed match start with regexp '" + r + "':" + err.Error())
 		return "", err
 	}
 	if illegal_start {

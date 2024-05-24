@@ -1,5 +1,8 @@
 name: 'load_testplan'
 description: 'Loads and merges multiple yaml files and sets github actions and outputs'
+branding:
+  icon: layers
+  color: blue
 inputs:
   files:
     description: 'Comma separated list of yaml files which will me merged from left to right'

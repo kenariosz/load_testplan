@@ -2,6 +2,7 @@ package testplan
 
 import (
 	"errors"
+	"fmt"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
 	"gopkg.in/natefinch/lumberjack.v2"
@@ -48,6 +49,7 @@ func (plan *Testplan) setupLogging() error {
 	default:
 		err := errors.New("Illegal log level " + plan.LogLevel)
 		log.Error().Err(err).Msg("Wrong parameter")
+		fmt.Println("::error :: Error: Wrong parameter:" + err.Error())
 		return err
 	}
 	log.Debug().
